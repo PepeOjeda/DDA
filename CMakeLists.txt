@@ -1,6 +1,6 @@
-cmake_minimum_required(VERSION 3.20)
+cmake_minimum_required(VERSION 3.10)
 project(DDA)
-set(CMAKE_CXX_FLAGS "-w -std=c++11 -O2 -g ${CMAKE_CXX_FLAGS}")
+set(CMAKE_CXX_FLAGS "-w -std=c++11 -O3 -g ${CMAKE_CXX_FLAGS}")
 
 include_directories(
     include
@@ -9,6 +9,6 @@ include_directories(
 
 add_subdirectory(third_party/glm)
 
-add_library(DDA DDA.cpp)
+add_library(DDA src/DDA.cpp)
 
 target_link_libraries(DDA glm)

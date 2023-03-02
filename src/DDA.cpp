@@ -120,7 +120,7 @@ void test()
         {1, 1, 1, 1, 1}
     };
 
-    //auto result = RayCasting::castRay({0.5, 0.5}, {0,1}, 10, map, {0,0}, 1);
+    //auto result = DDA::castRay({0.5, 0.5}, {0,1}, 10, map, {0,0}, 1);
     //std::cout<<result.hitSomething<<" "<<result.distance<<"m\n";
 
     auto result = DDA::marchRay({2.7, 0.5}, {1,1}, 10, map, {0,0}, 1);
