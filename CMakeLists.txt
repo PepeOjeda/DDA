@@ -4,11 +4,13 @@ set(CMAKE_CXX_FLAGS "-w -std=c++11 -O3 -g ${CMAKE_CXX_FLAGS}")
 
 include_directories(
     include
-    third_party/glm/glm
+    third_party/glm
 )
 
 add_subdirectory(third_party/glm)
 
 add_library(DDA src/DDA.cpp)
+add_executable(run_test test/test.cpp)
 
 target_link_libraries(DDA glm)
+target_link_libraries(run_test DDA)

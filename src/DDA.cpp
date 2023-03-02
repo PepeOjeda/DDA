@@ -1,20 +1,40 @@
 #include <DDA.h>
 #include <iostream>
 
+static void resetColor () {
+  printf("\033[0m");
+}
+
+static void Error () {
+  printf("\033[1;31m");
+  printf("[ERROR] ");
+  resetColor();
+}
+
+static void Warn() {
+  printf("\033[1;33m");
+  printf("[WARN] ");
+  resetColor();
+}
+
+
+
 namespace DDA{
 
 RayCastInfo castRay(const glm::vec2& start, glm::vec2 direction, const float maxDistance, const std::vector<std::vector<bool>>& map, const glm::vec2& mapOrigin, const float mapResolution)
 {
     if(glm::length(direction) == 0)
     {
-        //TODO ERROR MESSAGE
+        Warn();
+        printf("Ray of length 0\n");
         return {false,0};
     }
     
     glm::ivec2 currentCell = (start-mapOrigin)/mapResolution;
     if(!map[currentCell.x][currentCell.y])
     {
-        //TODO ERROR MESSAGE
+        Error();
+        printf("Ray outside the environment!\n"); 
         return {false,0};
     }
     glm::vec2 currentPosition = start;
@@ -56,14 +76,17 @@ RayMarchInfo marchRay(const glm::vec2& start, glm::vec2 direction, const float m
 {
     if(glm::length(direction) == 0)
     {
-        //TODO ERROR MESSAGE
+        Warn();
+        printf("Ray of length 0\n");
         return RayMarchInfo();
     }
     
     glm::ivec2 currentCell = (start-mapOrigin)/mapResolution;
+    
     if(!map[currentCell.x][currentCell.y])
     {
-        //TODO ERROR MESSAGE        
+        Error();
+        printf("Ray outside the environment!\n");   
         return RayMarchInfo();
     }
 
@@ -109,24 +132,3 @@ RayMarchInfo marchRay(const glm::vec2& start, glm::vec2 direction, const float m
 
 }
 
-void test()
-{
-    std::vector<std::vector<bool>> map = 
-    {
-        {1, 1, 1, 1, 1},
-        {1, 1, 0, 1, 1},
-        {1, 1, 0, 1, 1},
-        {1, 1, 0, 1, 1},
-        {1, 1, 1, 1, 1}
-    };
-
-    //auto result = DDA::castRay({0.5, 0.5}, {0,1}, 10, map, {0,0}, 1);
-    //std::cout<<result.hitSomething<<" "<<result.distance<<"m\n";
-
-    auto result = DDA::marchRay({2.7, 0.5}, {1,1}, 10, map, {0,0}, 1);
-    for(const auto& p : result.lengthInCell)
-    {
-        glm::ivec2 cell =p.first;
-        std::cout<<"("<<cell.x<<","<<cell.y<<")"<<": "<<p.second<<"\n";
-    }
-}
