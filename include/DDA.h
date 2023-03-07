@@ -31,9 +31,9 @@ namespace DDA
 
     struct RayMarchInfo
     {
-        std::unordered_map<glm::ivec2, float> lengthInCell;
+        std::vector<std::pair<glm::ivec2, float>> lengthInCell;
         RayMarchInfo(){}
-        RayMarchInfo(std::unordered_map<glm::ivec2, float> inputMap): lengthInCell(std::move(inputMap)){}
+        RayMarchInfo(std::vector<std::pair<glm::ivec2, float>> inputMap): lengthInCell(std::move(inputMap)){}
     };
 
     //returns true if a blocked cell was hit. The outline of the map is considered blocked.    
@@ -118,7 +118,7 @@ namespace DDA
         int stepY = glm::sign(direction.y);
         
         float currentDistance = 0;
-        std::unordered_map<glm::ivec2, float> lengthsMap; 
+        std::vector<std::pair<glm::ivec2, float>> lengthsMap; 
         while(true)
         {
             float xCoordNext = (stepX>0? currentCell.x+1 : currentCell.x) * mapResolution + mapOrigin.x;
@@ -128,7 +128,7 @@ namespace DDA
             if((stepX!=0 && tMaxX<tMaxY)|| stepY==0)
             {
                 if(tMaxX>0)
-                    lengthsMap.insert({currentCell, tMaxX});
+                    lengthsMap.emplace_back(currentCell, tMaxX);
                 currentPosition += direction * tMaxX;
                 currentCell += glm::ivec2{stepX, 0};
                 currentDistance += tMaxX;
@@ -136,7 +136,7 @@ namespace DDA
             else
             {
                 if(tMaxY>0)
-                    lengthsMap.insert({currentCell, tMaxY});
+                    lengthsMap.emplace_back(currentCell, tMaxY);
                 currentPosition += direction * tMaxY;
                 currentCell += glm::ivec2{0, stepY};
                 currentDistance += tMaxY;
