@@ -5,28 +5,55 @@
 
 void test()
 {
-    std::vector<std::vector<bool>> map = 
-    {
-        {1, 1, 1, 1, 1},
-        {1, 1, 0, 1, 1},
-        {1, 1, 0, 1, 1},
-        {1, 1, 0, 1, 1},
-        {1, 1, 1, 1, 1}
-    };
 
-    std::cout<<"Raycast:\n";
+    //2D
     {
-        auto result = DDA::castRay<bool>({0.5, 0.5}, {0,1}, 10, map, [](bool b){return b;}, {0,0}, 1);
-        std::cout<<result.hitSomething<<" "<<result.distance<<"m\n";
+        std::cout<<"2D\n";
+        std::vector<std::vector<bool>> map = 
+        {
+            {1, 1, 1, 1, 1},
+            {1, 1, 0, 1, 1},
+            {1, 1, 0, 1, 1},
+            {1, 1, 0, 1, 1},
+            {1, 1, 1, 1, 1}
+        };
+
+        std::cout<<"Raycast:\n";
+        {
+            auto result = DDA::_2D::castRay<bool>({0.5, 0.5}, {0,1}, 10, map, [](bool b){return b;}, {0,0}, 1);
+            std::cout<<result.hitSomething<<" "<<result.distance<<"m\n";
+        }
+
+        std::cout<<"Raymarch:\n";
+        {
+            auto result = DDA::_2D::marchRay<bool>({2.7, 0.5}, {1,1}, 10, map,[](bool b){return b;}, {0,0}, 1);
+            for(const auto& p : result.lengthInCell)
+            {
+                glm::ivec2 cell =p.first;
+                std::cout<<"("<<cell.x<<","<<cell.y<<")"<<": "<<p.second<<"\n";
+            }
+        }
     }
 
-    std::cout<<"Raymarch:\n";
+    //3D
     {
-        auto result = DDA::marchRay<bool>({2.7, 0.5}, {1,1}, 10, map,[](bool b){return b;}, {0,0}, 1);
-        for(const auto& p : result.lengthInCell)
+        std::cout<<"3D\n";
+        std::vector<std::vector<std::vector<bool>>> map(5, std::vector<std::vector<bool>>(5, std::vector<bool>(5, true)) );
+        std::cout<<"Raycast:\n";
         {
-            glm::ivec2 cell =p.first;
-            std::cout<<"("<<cell.x<<","<<cell.y<<")"<<": "<<p.second<<"\n";
+            auto result = DDA::_3D::castRay<bool>({0, 0, 0}, {1, 1, 1}, 10, map, [](bool b){return b;}, {0,0, 0}, 1);
+            std::cout<<result.hitSomething<<" "<<result.distance<<"m\n";
+        }
+
+        std::cout<<"Raymarch:\n";
+        {
+            auto result = DDA::_3D::marchRay<bool>({0, 0, 0}, {1,1,1}, 10, map,[](bool b){return b;}, {0,0,0}, 1);
+            for(const auto& p : result.lengthInCell)
+            {
+                glm::ivec2 cell =p.first;
+                std::cout<<"("<<cell.x<<","<<cell.y<<")"<<": "<<p.second<<"\n";
+            }
+            
         }
     }
 }
