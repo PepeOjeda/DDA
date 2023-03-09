@@ -11,4 +11,4 @@ add_subdirectory(third_party/glm)
 
 add_executable(run_test test/test.cpp)
 
-target_link_libraries(run_test DDA)
+target_link_libraries(run_test glm)

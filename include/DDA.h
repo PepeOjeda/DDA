@@ -1,7 +1,7 @@
 #include <vector>
 #include "glm/glm.hpp"
-#define GLM_ENABLE_EXPERIMENTAL
-#include "glm/gtx/hash.hpp"
+#include "glm/common.hpp"
+#include <functional>
 
 #include <unordered_map>
 
@@ -32,8 +32,11 @@ namespace DDA::_2D
     struct RayMarchInfo
     {
         std::vector<std::pair<glm::ivec2, float>> lengthInCell;
-        RayMarchInfo(){}
-        RayMarchInfo(std::vector<std::pair<glm::ivec2, float>> inputMap): lengthInCell(std::move(inputMap)){}
+        float totalLength;
+        RayMarchInfo() : totalLength(0) {}
+        RayMarchInfo(std::vector<std::pair<glm::ivec2, float>> inputMap, float length)
+            : lengthInCell(std::move(inputMap)), totalLength(length)
+        {}
     };
 
     //returns true if a blocked cell was hit. The outline of the map is considered blocked.    
@@ -48,7 +51,9 @@ namespace DDA::_2D
         }
         
         glm::ivec2 currentCell = (start-mapOrigin)/mapResolution;
-        if( !predicate(map[currentCell.x][currentCell.y]) )
+        if( currentCell.x<0 ||currentCell.x>=map.size()||
+            currentCell.y<0 ||currentCell.y>=map[0].size()||
+            !predicate(map[currentCell.x][currentCell.y]) )
         {
             Error();
             printf("Ray outside the environment!\n"); 
@@ -65,9 +70,22 @@ namespace DDA::_2D
         {
             float xCoordNext = (stepX>0? currentCell.x+1 : currentCell.x) * mapResolution + mapOrigin.x;
             float yCoordNext = (stepY>0? currentCell.y+1 : currentCell.y) * mapResolution + mapOrigin.y;
+
+            //how far to move along direction, correcting for floating-point shenanigans
             float tX = (xCoordNext-currentPosition.x)/direction.x;
+            if(tX<=0)
+            {
+                xCoordNext += stepX*mapResolution;
+                tX = (xCoordNext-currentPosition.x)/direction.x;
+            }
             float tY = (yCoordNext-currentPosition.y)/direction.y;
-            if((stepX!=0 && tX<tY)|| stepY==0)
+            if(tY<=0)
+            {
+                yCoordNext += stepY*mapResolution;
+                tY = (yCoordNext-currentPosition.y)/direction.y;
+            }
+
+            if((stepX!=0 && tX>0 && tX<tY) || (stepY==0 || tY <= 0))
             {
                 currentPosition += direction * tX;
                 currentDistance += tX;
@@ -77,7 +95,8 @@ namespace DDA::_2D
                 currentPosition += direction * tY;
                 currentDistance += tY;
             }
-            currentCell = (currentPosition-mapOrigin)/mapResolution;
+            currentCell = glm::floor( (currentPosition-mapOrigin)/mapResolution );
+
 
             if(glm::length(currentPosition-start)>maxDistance)
                 return {false, maxDistance};
@@ -102,10 +121,12 @@ namespace DDA::_2D
         
         glm::ivec2 currentCell = (start-mapOrigin)/mapResolution;
         
-        if(!predicate( map[currentCell.x][currentCell.y] ) )
+        if(currentCell.x<0 ||currentCell.x>=map.size()||
+            currentCell.y<0 ||currentCell.y>=map[0].size()||
+            !predicate( map[currentCell.x][currentCell.y] ) )
         {
             Error();
-            printf("Ray outside the environment!\n");   
+            printf("Ray origin in invalid position: (%f, %f)\n", start.x, start.y);   
 
             return RayMarchInfo();
         }
@@ -122,30 +143,43 @@ namespace DDA::_2D
         {
             float xCoordNext = (stepX>0? currentCell.x+1 : currentCell.x) * mapResolution + mapOrigin.x;
             float yCoordNext = (stepY>0? currentCell.y+1 : currentCell.y) * mapResolution + mapOrigin.y;
+
+            //how far to move along direction, correcting for floating-point shenanigans
             float tX = (xCoordNext-currentPosition.x)/direction.x;
-            float tY = (yCoordNext-currentPosition.y)/direction.y;
-            if((stepX!=0 && tX<tY)|| stepY==0)
+            if(tX<=0)
             {
-                if(tX>0)
-                    lengthsMap.emplace_back(currentCell, tX);
+                xCoordNext += stepX*mapResolution;
+                tX = (xCoordNext-currentPosition.x)/direction.x;
+            }
+            float tY = (yCoordNext-currentPosition.y)/direction.y;
+            if(tY<=0)
+            {
+                yCoordNext += stepY*mapResolution;
+                tY = (yCoordNext-currentPosition.y)/direction.y;
+            }
+
+
+
+            if((stepX!=0 && tX>0 && tX<tY) || (stepY==0 || tY <= 0))
+            {
+                lengthsMap.emplace_back(currentCell, tX);
                 currentPosition += direction * tX;
                 currentDistance += tX;
             }
             else
             {
-                if(tY>0)
-                    lengthsMap.emplace_back(currentCell, tY);
+                lengthsMap.emplace_back(currentCell, tY);
                 currentPosition += direction * tY;
                 currentDistance += tY;
             }
-            currentCell = (currentPosition-mapOrigin)/mapResolution;
+            currentCell = glm::floor( (currentPosition-mapOrigin)/mapResolution );
 
             if(glm::length(currentPosition-start)>maxDistance)
                 return RayMarchInfo();
             else if (currentCell.x<0 || currentCell.x>=map.size()
                     || currentCell.y<0 || currentCell.y>=map[0].size()
                     || !predicate( map[currentCell.x][currentCell.y] ) )
-                return {lengthsMap};
+                return {lengthsMap, currentDistance};
         }
     }
 }
@@ -162,8 +196,11 @@ namespace DDA::_3D
     struct RayMarchInfo
     {
         std::vector<std::pair<glm::ivec3, float>> lengthInCell;
-        RayMarchInfo(){}
-        RayMarchInfo(std::vector<std::pair<glm::ivec3, float>> inputMap): lengthInCell(std::move(inputMap)){}
+        float totalLength;
+        RayMarchInfo() : totalLength(0){}
+        RayMarchInfo(std::vector<std::pair<glm::ivec3, float>> inputMap, float length): 
+            lengthInCell(std::move(inputMap)), totalLength(length)
+        {}
     };
 
     //returns true if a blocked cell was hit. The outline of the map is considered blocked.    
@@ -178,10 +215,14 @@ namespace DDA::_3D
         }
         
         glm::ivec3 currentCell = (start-mapOrigin)/mapResolution;
-        if( !predicate(map[currentCell.x][currentCell.y][currentCell.z]) )
+        if( currentCell.x<0 ||currentCell.x>=map.size()||
+            currentCell.y<0 ||currentCell.y>=map[0].size()||
+            currentCell.z<0 ||currentCell.z>=map[0][0].size()||
+            !predicate(map[currentCell.x][currentCell.y][currentCell.z]) )
         {
-            Error();
-            printf("Ray outside the environment!\n"); 
+            Error();            
+            printf("Ray origin in invalid position: (%f, %f, %f)\n", start.x, start.y, start.z);   
+
             return {false,0};
         }
         glm::vec3 currentPosition = start;
@@ -197,15 +238,35 @@ namespace DDA::_3D
             float xCoordNext = (stepX>0? currentCell.x+1 : currentCell.x) * mapResolution + mapOrigin.x;
             float yCoordNext = (stepY>0? currentCell.y+1 : currentCell.y) * mapResolution + mapOrigin.y;
             float zCoordNext = (stepZ>0? currentCell.z+1 : currentCell.z) * mapResolution + mapOrigin.z;
+
+            //how far to move along direction, correcting for floating-point shenanigans
             float tX = (xCoordNext-currentPosition.x)/direction.x;
+            if(tX<=0)
+            {
+                xCoordNext += stepX*mapResolution;
+                tX = (xCoordNext-currentPosition.x)/direction.x;
+            }
             float tY = (yCoordNext-currentPosition.y)/direction.y;
+            if(tY<=0)
+            {
+                yCoordNext += stepY*mapResolution;
+                tY = (yCoordNext-currentPosition.y)/direction.y;
+            }
             float tZ = (zCoordNext-currentPosition.z)/direction.z;
-            if(stepX!=0 && (tX<tY|| stepY==0) && (tX<tZ||stepZ==0) )
+            if(tZ<=0)
+            {
+                zCoordNext += stepZ*mapResolution;
+                tZ = (zCoordNext-currentPosition.z)/direction.z;
+            }
+
+
+
+            if((stepX!=0 && tX>0) && (tX<tY || stepY==0 || tY <= 0) && (tX<tZ || stepZ==0 || tZ <= 0))
             {
                 currentPosition += direction * tX;
                 currentDistance += tX;
             }
-            else if (stepY != 0 && (tY<tZ || stepZ==0))
+            else if ((stepY!=0 && tY>0) && (tY<tZ || stepZ==0 || tZ <= 0))
             {
                 currentPosition += direction * tY;
                 currentDistance += tY;
@@ -216,7 +277,8 @@ namespace DDA::_3D
                 currentDistance += tZ;
             }
 
-            currentCell = (currentPosition-mapOrigin)/mapResolution;
+            currentCell = glm::floor( (currentPosition-mapOrigin)/mapResolution );
+        
 
             if(currentDistance>maxDistance)
                 return {false, maxDistance};
@@ -242,7 +304,10 @@ namespace DDA::_3D
         
         glm::ivec3 currentCell = (start-mapOrigin)/mapResolution;
         
-        if(!predicate( map[currentCell.x][currentCell.y][currentCell.z] ) )
+        if( currentCell.x<0 ||currentCell.x>=map.size()||
+            currentCell.y<0 ||currentCell.y>=map[0].size()||
+            currentCell.z<0 ||currentCell.z>=map[0][0].size()||
+            !predicate(map[currentCell.x][currentCell.y][currentCell.z]) )
         {
             Error();
             printf("Ray outside the environment!\n");   
@@ -264,9 +329,27 @@ namespace DDA::_3D
             float xCoordNext = (stepX>0? currentCell.x+1 : currentCell.x) * mapResolution + mapOrigin.x;
             float yCoordNext = (stepY>0? currentCell.y+1 : currentCell.y) * mapResolution + mapOrigin.y;
             float zCoordNext = (stepZ>0? currentCell.z+1 : currentCell.z) * mapResolution + mapOrigin.z;
+
+            //how far to move along direction, correcting for floating-point shenanigans
             float tX = (xCoordNext-currentPosition.x)/direction.x;
+            if(tX<=0)
+            {
+                xCoordNext += stepX*mapResolution;
+                tX = (xCoordNext-currentPosition.x)/direction.x;
+            }
             float tY = (yCoordNext-currentPosition.y)/direction.y;
+            if(tY<=0)
+            {
+                yCoordNext += stepY*mapResolution;
+                tY = (yCoordNext-currentPosition.y)/direction.y;
+            }
             float tZ = (zCoordNext-currentPosition.z)/direction.z;
+            if(tZ<=0)
+            {
+                zCoordNext += stepZ*mapResolution;
+                tZ = (zCoordNext-currentPosition.z)/direction.z;
+            }
+            
             if(stepX!=0 && (tX<tY|| stepY==0) && (tX<tZ||stepZ==0) )
             {
                 if(tX>0)
@@ -289,7 +372,7 @@ namespace DDA::_3D
                 currentDistance += tZ;
             }
 
-            currentCell = (currentPosition-mapOrigin)/mapResolution;
+            currentCell = glm::floor( (currentPosition-mapOrigin)/mapResolution );
             
             if(currentDistance>maxDistance)
                 return RayMarchInfo();
@@ -297,7 +380,7 @@ namespace DDA::_3D
                     || currentCell.y<0 || currentCell.y>=map[0].size()
                     || currentCell.z<0 || currentCell.z>=map[0][0].size()
                     || !predicate( map[currentCell.x][currentCell.y][currentCell.z] ) )
-                return {lengthsMap};
+                return {lengthsMap, currentDistance};
         }
     }
     
