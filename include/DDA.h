@@ -41,7 +41,7 @@ namespace DDA::_2D
 
     //returns true if a blocked cell was hit. The outline of the map is considered blocked.    
     template<typename T>
-    RayCastInfo castRay(const glm::vec2& start, glm::vec2 direction, const float maxDistance, const std::vector<std::vector<T>>& map, std::function<bool(T)> predicate, const glm::vec2& mapOrigin, const float mapResolution)
+    RayCastInfo castRay(const glm::vec2& start, glm::vec2 direction, const float maxDistance, const std::vector<std::vector<T>>& map, const std::function<bool(const T&)>& predicate, const glm::vec2& mapOrigin, const float mapResolution)
     {
         if(glm::length(direction) == 0)
         {
@@ -109,7 +109,7 @@ namespace DDA::_2D
     
     //returns how far through each cell the ray has traveled. Useful for volumetric calculations
     template <typename T>
-    RayMarchInfo marchRay(const glm::vec2& start, glm::vec2 direction, const float maxDistance, const std::vector<std::vector<T>>& map,std::function<bool(T)> predicate, const glm::vec2& mapOrigin, const float mapResolution)
+    RayMarchInfo marchRay(const glm::vec2& start, glm::vec2 direction, const float maxDistance, const std::vector<std::vector<T>>& map,const std::function<bool(const T&)>& predicate, const glm::vec2& mapOrigin, const float mapResolution)
     {
         if(glm::length(direction) == 0)
         {
@@ -205,7 +205,7 @@ namespace DDA::_3D
 
     //returns true if a blocked cell was hit. The outline of the map is considered blocked.    
     template<typename T>
-    RayCastInfo castRay(const glm::vec3& start, glm::vec3 direction, const float maxDistance, const std::vector<std::vector<std::vector<T>>>& map, std::function<bool(T)> predicate, const glm::vec3& mapOrigin, const float mapResolution)
+    RayCastInfo castRay(const glm::vec3& start, glm::vec3 direction, const float maxDistance, const std::vector<std::vector<std::vector<T>>>& map, const std::function<bool(const T&)>& predicate, const glm::vec3& mapOrigin, const float mapResolution)
     {
         if(glm::length(direction) == 0)
         {
@@ -292,7 +292,7 @@ namespace DDA::_3D
     
     //returns how far through each cell the ray has traveled. Useful for volumetric calculations
     template <typename T>
-    RayMarchInfo marchRay(const glm::vec3& start, glm::vec3 direction, const float maxDistance, const std::vector<std::vector<std::vector<T>>>& map,std::function<bool(T)> predicate, const glm::vec3& mapOrigin, const float mapResolution)
+    RayMarchInfo marchRay(const glm::vec3& start, glm::vec3 direction, const float maxDistance, const std::vector<std::vector<std::vector<T>>>& map,const std::function<bool(const T&)>& predicate, const glm::vec3& mapOrigin, const float mapResolution)
     {
         if(glm::length(direction) == 0)
         {
