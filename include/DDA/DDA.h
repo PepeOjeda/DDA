@@ -1,7 +1,8 @@
 #include <vector>
-#include "glm/glm.hpp"
-#include "glm/common.hpp"
+#include "../../third_party/glm/glm/glm.hpp"
+#include "../../third_party/glm/glm/common.hpp"
 #include <functional>
+#include <iostream>
 
 #include <unordered_map>
 
