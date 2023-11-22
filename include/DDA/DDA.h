@@ -44,6 +44,10 @@ namespace DDA::_2D
     template <typename T> struct Map
     {
         Map(){}
+        Map(std::vector<std::vector<T>> _cells,
+            glm::vec2 _origin,
+            float _resolution): cells(_cells), origin(_origin), resolution(_resolution)
+            {}
         std::vector<std::vector<T>> cells;
         glm::vec2 origin;
         float resolution;
@@ -211,6 +215,10 @@ namespace DDA::_3D
     template <typename T> struct Map
     {
         Map(){}
+        Map(std::vector<std::vector<std::vector<T>>> _cells,
+            glm::vec3 _origin,
+            float _resolution): cells(_cells), origin(_origin), resolution(_resolution)
+            {}
         std::vector<std::vector<std::vector<T>>> cells;
         glm::vec3 origin;
         float resolution;
