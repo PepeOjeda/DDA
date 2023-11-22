@@ -1,8 +1,18 @@
+#include "Vector2Int.h"
+#include "Vector3Int.h"
+
 #include <vector>
-#include "../../third_party/glm/glm/glm.hpp"
-#include "../../third_party/glm/glm/common.hpp"
 #include <functional>
 #include <iostream>
+
+static int sign(float x)
+{
+    if (x > 0)
+        return 1;
+    if (x < 0)
+        return -1;
+    return 0;
+}
 
 static void resetColor()
 {
@@ -33,37 +43,36 @@ namespace DDA::_2D
 
     struct RayMarchInfo
     {
-        std::vector<std::pair<glm::ivec2, float>> lengthInCell;
+        std::vector<std::pair<Vector2Int, float>> lengthInCell;
         float totalLength;
         RayMarchInfo() : totalLength(0)
         {}
-        RayMarchInfo(std::vector<std::pair<glm::ivec2, float>> inputMap, float length) : lengthInCell(std::move(inputMap)), totalLength(length)
+        RayMarchInfo(std::vector<std::pair<Vector2Int, float>> inputMap, float length) : lengthInCell(std::move(inputMap)), totalLength(length)
         {}
     };
 
     template <typename T> struct Map
     {
-        Map(){}
-        std::vector<std::vector<T>>& cells;
-        glm::vec2 origin;
+        std::vector<std::vector<T>> cells;
+        Vector2 origin;
         float resolution;
     };
 
     // returns true if a blocked cell was hit. The outline of the map is considered blocked.
     template <typename T>
     RayCastInfo castRay(
-        const glm::vec2& start, glm::vec2 direction, const float maxDistance, const Map<T>& map, const std::function<bool(const T&)>& mapPredicate,
-        const std::function<bool(const glm::vec2&)>& positionPredicate = [](const glm::vec2& v) { return true; })
+        const Vector2& start, Vector2 direction, const float maxDistance, const Map<T>& map, const std::function<bool(const T&)>& mapPredicate,
+        const std::function<bool(const Vector2&)>& positionPredicate = [](const Vector2& v) { return true; })
     {
-        if (glm::length(direction) == 0)
+        if (direction.norm() == 0)
         {
             Warn();
             printf("Ray of length 0\n");
             return {false, 0};
         }
 
-        glm::ivec2 currentCell = (start - map.origin) / map.resolution;
-        glm::vec2 currentPosition = start;
+        Vector2 currentPosition = start;
+        Vector2Int currentCell = static_cast<Vector2Int>((currentPosition - map.origin) / map.resolution);
         if (currentCell.x < 0 || currentCell.x >= map.cells.size() || currentCell.y < 0 || currentCell.y >= map.cells[0].size() ||
             !mapPredicate(map.cells[currentCell.x][currentCell.y]) || !positionPredicate(currentPosition))
         {
@@ -72,9 +81,9 @@ namespace DDA::_2D
             return {false, 0};
         }
 
-        direction = direction / glm::length(direction);
-        int stepX = glm::sign(direction.x);
-        int stepY = glm::sign(direction.y);
+        direction.normalize();
+        int stepX = sign(direction.x);
+        int stepY = sign(direction.y);
 
         float currentDistance = 0;
         while (true)
@@ -106,9 +115,9 @@ namespace DDA::_2D
                 currentPosition += direction * tY;
                 currentDistance += tY;
             }
-            currentCell = glm::floor((currentPosition - map.origin) / map.resolution);
+            currentCell = static_cast<Vector2Int>((currentPosition - map.origin) / map.resolution);
 
-            if (glm::length(currentPosition - start) > maxDistance)
+            if ((currentPosition - start).norm() > maxDistance)
                 return {false, maxDistance};
             else if (currentCell.x < 0 || currentCell.x >= map.cells.size() || currentCell.y < 0 || currentCell.y >= map.cells[0].size() ||
                      !mapPredicate(map.cells[currentCell.x][currentCell.y]) || !positionPredicate(currentPosition))
@@ -119,10 +128,10 @@ namespace DDA::_2D
     // returns how far through each cell the ray has traveled. Useful for volumetric calculations
     template <typename T>
     RayMarchInfo marchRay(
-        const glm::vec2& start, glm::vec2 direction, const float maxDistance, const Map<T>& map, const std::function<bool(const T&)>& mapPredicate,
-        const std::function<bool(const glm::vec2&)>& positionPredicate = [](const glm::vec2& v) { return true; })
+        const Vector2& start, Vector2 direction, const float maxDistance, const Map<T>& map, const std::function<bool(const T&)>& mapPredicate,
+        const std::function<bool(const Vector2&)>& positionPredicate = [](const Vector2& v) { return true; })
     {
-        if (glm::length(direction) == 0)
+        if (direction.norm() == 0)
         {
             Warn();
             printf("Ray of length 0\n");
@@ -130,8 +139,8 @@ namespace DDA::_2D
             return RayMarchInfo();
         }
 
-        glm::ivec2 currentCell = (start - map.origin) / map.resolution;
-        glm::vec2 currentPosition = start;
+        Vector2 currentPosition = start;
+        Vector2Int currentCell = static_cast<Vector2Int>((currentPosition - map.origin) / map.resolution);
 
         if (currentCell.x < 0 || currentCell.x >= map.cells.size() || currentCell.y < 0 || currentCell.y >= map.cells[0].size() ||
             !mapPredicate(map.cells[currentCell.x][currentCell.y]) || !positionPredicate(currentPosition))
@@ -142,12 +151,12 @@ namespace DDA::_2D
             return RayMarchInfo();
         }
 
-        direction = direction / glm::length(direction);
-        int stepX = glm::sign(direction.x);
-        int stepY = glm::sign(direction.y);
+        direction = direction / direction.norm();
+        int stepX = sign(direction.x);
+        int stepY = sign(direction.y);
 
         float currentDistance = 0;
-        std::vector<std::pair<glm::ivec2, float>> lengthsMap;
+        std::vector<std::pair<Vector2Int, float>> lengthsMap;
         while (true)
         {
             float xCoordNext = (stepX > 0 ? currentCell.x + 1 : currentCell.x) * map.resolution + map.origin.x;
@@ -179,9 +188,9 @@ namespace DDA::_2D
                 currentPosition += direction * tY;
                 currentDistance += tY;
             }
-            currentCell = glm::floor((currentPosition - map.origin) / map.resolution);
+            currentCell = static_cast<Vector2Int>((currentPosition - map.origin) / map.resolution);
 
-            if (glm::length(currentPosition - start) > maxDistance)
+            if ((currentPosition - start).norm() > maxDistance)
                 return RayMarchInfo();
             else if (currentCell.x < 0 || currentCell.x >= map.cells.size() || currentCell.y < 0 || currentCell.y >= map.cells[0].size() ||
                      !mapPredicate(map.cells[currentCell.x][currentCell.y]) || !positionPredicate(currentPosition))
@@ -200,37 +209,36 @@ namespace DDA::_3D
 
     struct RayMarchInfo
     {
-        std::vector<std::pair<glm::ivec3, float>> lengthInCell;
+        std::vector<std::pair<Vector3Int, float>> lengthInCell;
         float totalLength;
         RayMarchInfo() : totalLength(0)
         {}
-        RayMarchInfo(std::vector<std::pair<glm::ivec3, float>> inputMap, float length) : lengthInCell(std::move(inputMap)), totalLength(length)
+        RayMarchInfo(std::vector<std::pair<Vector3Int, float>> inputMap, float length) : lengthInCell(std::move(inputMap)), totalLength(length)
         {}
     };
 
     template <typename T> struct Map
     {
-        Map(){}
-        std::vector<std::vector<std::vector<T>>>& cells;
-        glm::vec3 origin;
+        std::vector<std::vector<std::vector<T>>> cells;
+        Vector3 origin;
         float resolution;
     };
 
     // returns true if a blocked cell was hit. The outline of the map is considered blocked.
     template <typename T>
     RayCastInfo castRay(
-        const glm::vec3& start, glm::vec3 direction, const float maxDistance, const Map<T>& map, const std::function<bool(const T&)>& mapPredicate,
-        const std::function<bool(const glm::vec3&)>& positionPredicate = [](const glm::vec3& v) { return true; })
+        const Vector3& start, Vector3 direction, const float maxDistance, const Map<T>& map, const std::function<bool(const T&)>& mapPredicate,
+        const std::function<bool(const Vector3&)>& positionPredicate = [](const Vector3& v) { return true; })
     {
-        if (glm::length(direction) == 0)
+        if (direction.norm() == 0)
         {
             Warn();
             printf("Ray of length 0\n");
             return {false, 0};
         }
 
-        glm::ivec3 currentCell = (start - map.origin) / map.resolution;
-        glm::vec3 currentPosition = start;
+        Vector3 currentPosition = start;
+        Vector3Int currentCell = static_cast<Vector3Int>((currentPosition - map.origin) / map.resolution);
         if (currentCell.x < 0 || currentCell.x >= map.cells.size() || currentCell.y < 0 || currentCell.y >= map.cells[0].size() ||
             currentCell.z < 0 || currentCell.z >= map.cells[0][0].size() || !mapPredicate(map.cells[currentCell.x][currentCell.y][currentCell.z]) ||
             !positionPredicate(currentPosition))
@@ -241,10 +249,10 @@ namespace DDA::_3D
             return {false, 0};
         }
 
-        direction = direction / glm::length(direction);
-        int stepX = glm::sign(direction.x);
-        int stepY = glm::sign(direction.y);
-        int stepZ = glm::sign(direction.z);
+        direction = direction / direction.norm();
+        int stepX = sign(direction.x);
+        int stepY = sign(direction.y);
+        int stepZ = sign(direction.z);
 
         float currentDistance = 0;
         while (true)
@@ -289,7 +297,7 @@ namespace DDA::_3D
                 currentDistance += tZ;
             }
 
-            currentCell = glm::floor((currentPosition - map.origin) / map.resolution);
+            currentCell = static_cast<Vector3Int>((currentPosition - map.origin) / map.resolution);
 
             if (currentDistance > maxDistance)
                 return {false, maxDistance};
@@ -303,10 +311,10 @@ namespace DDA::_3D
     // returns how far through each cell the ray has traveled. Useful for volumetric calculations
     template <typename T>
     RayMarchInfo marchRay(
-        const glm::vec3& start, glm::vec3 direction, const float maxDistance, const Map<T>& map, const std::function<bool(const T&)>& mapPredicate,
-        const std::function<bool(const glm::vec3&)>& positionPredicate = [](const glm::vec3& v) { return true; })
+        const Vector3& start, Vector3 direction, const float maxDistance, const Map<T>& map, const std::function<bool(const T&)>& mapPredicate,
+        const std::function<bool(const Vector3&)>& positionPredicate = [](const Vector3& v) { return true; })
     {
-        if (glm::length(direction) == 0)
+        if (direction.norm() == 0)
         {
             Warn();
             printf("Ray of length 0\n");
@@ -314,8 +322,8 @@ namespace DDA::_3D
             return RayMarchInfo();
         }
 
-        glm::ivec3 currentCell = (start - map.origin) / map.resolution;
-        glm::vec3 currentPosition = start;
+        Vector3 currentPosition = start;
+        Vector3Int currentCell = static_cast<Vector3Int>((currentPosition - map.origin) / map.resolution);
 
         if (currentCell.x < 0 || currentCell.x >= map.cells.size() || currentCell.y < 0 || currentCell.y >= map.cells[0].size() ||
             currentCell.z < 0 || currentCell.z >= map.cells[0][0].size() || !mapPredicate(map.cells[currentCell.x][currentCell.y][currentCell.z]) ||
@@ -327,13 +335,13 @@ namespace DDA::_3D
             return RayMarchInfo();
         }
 
-        direction = direction / glm::length(direction);
-        int stepX = glm::sign(direction.x);
-        int stepY = glm::sign(direction.y);
-        int stepZ = glm::sign(direction.z);
+        direction = direction / direction.norm();
+        int stepX = sign(direction.x);
+        int stepY = sign(direction.y);
+        int stepZ = sign(direction.z);
 
         float currentDistance = 0;
-        std::vector<std::pair<glm::ivec3, float>> lengthsMap;
+        std::vector<std::pair<Vector3Int, float>> lengthsMap;
         while (true)
         {
             float xCoordNext = (stepX > 0 ? currentCell.x + 1 : currentCell.x) * map.resolution + map.origin.x;
@@ -382,7 +390,7 @@ namespace DDA::_3D
                 currentDistance += tZ;
             }
 
-            currentCell = glm::floor((currentPosition - map.origin) / map.resolution);
+            currentCell = static_cast<Vector3Int>((currentPosition - map.origin) / map.resolution);
 
             if (currentDistance > maxDistance)
                 return RayMarchInfo();

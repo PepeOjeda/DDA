@@ -31,7 +31,7 @@ void test()
             auto result = DDA::_2D::marchRay<bool>({2.7, 0.5}, {1,1}, 10, map,[](bool b){return b;});
             for(const auto& p : result.lengthInCell)
             {
-                glm::ivec2 cell =p.first;
+                Vector2Int cell =p.first;
                 std::cout<<"("<<cell.x<<","<<cell.y<<")"<<": "<<p.second<<"\n";
             }
         }
@@ -55,7 +55,7 @@ void test()
             auto result = DDA::_3D::marchRay<bool>({0, 0, 0}, {1,1,1}, 10, map,[](bool b){return b;});
             for(const auto& p : result.lengthInCell)
             {
-                glm::ivec2 cell =p.first;
+                Vector3Int cell =p.first;
                 std::cout<<"("<<cell.x<<","<<cell.y<<")"<<": "<<p.second<<"\n";
             }
             
