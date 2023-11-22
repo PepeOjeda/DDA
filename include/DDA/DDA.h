@@ -43,6 +43,7 @@ namespace DDA::_2D
 
     template <typename T> struct Map
     {
+        Map(){}
         std::vector<std::vector<T>>& cells;
         glm::vec2 origin;
         float resolution;
@@ -51,7 +52,7 @@ namespace DDA::_2D
     // returns true if a blocked cell was hit. The outline of the map is considered blocked.
     template <typename T>
     RayCastInfo castRay(
-        const glm::vec2& start, glm::vec2 direction, const float maxDistance, const Map<T>& map, const std::function<bool(const T&)>& predicate,
+        const glm::vec2& start, glm::vec2 direction, const float maxDistance, const Map<T>& map, const std::function<bool(const T&)>& mapPredicate,
         const std::function<bool(const glm::vec2&)>& positionPredicate = [](const glm::vec2& v) { return true; })
     {
         if (glm::length(direction) == 0)
@@ -64,7 +65,7 @@ namespace DDA::_2D
         glm::ivec2 currentCell = (start - map.origin) / map.resolution;
         glm::vec2 currentPosition = start;
         if (currentCell.x < 0 || currentCell.x >= map.cells.size() || currentCell.y < 0 || currentCell.y >= map.cells[0].size() ||
-            !predicate(map.cells[currentCell.x][currentCell.y]) || !positionPredicate(currentPosition))
+            !mapPredicate(map.cells[currentCell.x][currentCell.y]) || !positionPredicate(currentPosition))
         {
             Error();
             printf("Ray outside the environment!\n");
@@ -110,7 +111,7 @@ namespace DDA::_2D
             if (glm::length(currentPosition - start) > maxDistance)
                 return {false, maxDistance};
             else if (currentCell.x < 0 || currentCell.x >= map.cells.size() || currentCell.y < 0 || currentCell.y >= map.cells[0].size() ||
-                     !predicate(map.cells[currentCell.x][currentCell.y]) || !positionPredicate(currentPosition))
+                     !mapPredicate(map.cells[currentCell.x][currentCell.y]) || !positionPredicate(currentPosition))
                 return {true, currentDistance};
         }
     }
@@ -118,7 +119,7 @@ namespace DDA::_2D
     // returns how far through each cell the ray has traveled. Useful for volumetric calculations
     template <typename T>
     RayMarchInfo marchRay(
-        const glm::vec2& start, glm::vec2 direction, const float maxDistance, const Map<T>& map, const std::function<bool(const T&)>& predicate,
+        const glm::vec2& start, glm::vec2 direction, const float maxDistance, const Map<T>& map, const std::function<bool(const T&)>& mapPredicate,
         const std::function<bool(const glm::vec2&)>& positionPredicate = [](const glm::vec2& v) { return true; })
     {
         if (glm::length(direction) == 0)
@@ -133,7 +134,7 @@ namespace DDA::_2D
         glm::vec2 currentPosition = start;
 
         if (currentCell.x < 0 || currentCell.x >= map.cells.size() || currentCell.y < 0 || currentCell.y >= map.cells[0].size() ||
-            !predicate(map.cells[currentCell.x][currentCell.y]) || !positionPredicate(currentPosition))
+            !mapPredicate(map.cells[currentCell.x][currentCell.y]) || !positionPredicate(currentPosition))
         {
             Error();
             printf("Ray origin in invalid position: (%f, %f)\n", start.x, start.y);
@@ -183,7 +184,7 @@ namespace DDA::_2D
             if (glm::length(currentPosition - start) > maxDistance)
                 return RayMarchInfo();
             else if (currentCell.x < 0 || currentCell.x >= map.cells.size() || currentCell.y < 0 || currentCell.y >= map.cells[0].size() ||
-                     !predicate(map.cells[currentCell.x][currentCell.y]) || !positionPredicate(currentPosition))
+                     !mapPredicate(map.cells[currentCell.x][currentCell.y]) || !positionPredicate(currentPosition))
                 return {lengthsMap, currentDistance};
         }
     }
@@ -209,6 +210,7 @@ namespace DDA::_3D
 
     template <typename T> struct Map
     {
+        Map(){}
         std::vector<std::vector<std::vector<T>>>& cells;
         glm::vec3 origin;
         float resolution;
@@ -217,7 +219,7 @@ namespace DDA::_3D
     // returns true if a blocked cell was hit. The outline of the map is considered blocked.
     template <typename T>
     RayCastInfo castRay(
-        const glm::vec3& start, glm::vec3 direction, const float maxDistance, const Map<T>& map, const std::function<bool(const T&)>& predicate,
+        const glm::vec3& start, glm::vec3 direction, const float maxDistance, const Map<T>& map, const std::function<bool(const T&)>& mapPredicate,
         const std::function<bool(const glm::vec3&)>& positionPredicate = [](const glm::vec3& v) { return true; })
     {
         if (glm::length(direction) == 0)
@@ -230,7 +232,7 @@ namespace DDA::_3D
         glm::ivec3 currentCell = (start - map.origin) / map.resolution;
         glm::vec3 currentPosition = start;
         if (currentCell.x < 0 || currentCell.x >= map.cells.size() || currentCell.y < 0 || currentCell.y >= map.cells[0].size() ||
-            currentCell.z < 0 || currentCell.z >= map.cells[0][0].size() || !predicate(map.cells[currentCell.x][currentCell.y][currentCell.z]) ||
+            currentCell.z < 0 || currentCell.z >= map.cells[0][0].size() || !mapPredicate(map.cells[currentCell.x][currentCell.y][currentCell.z]) ||
             !positionPredicate(currentPosition))
         {
             Error();
@@ -293,7 +295,7 @@ namespace DDA::_3D
                 return {false, maxDistance};
             else if (currentCell.x < 0 || currentCell.x >= map.cells.size() || currentCell.y < 0 || currentCell.y >= map.cells[0].size() ||
                      currentCell.z < 0 || currentCell.z >= map.cells[0][0].size() ||
-                     !predicate(map.cells[currentCell.x][currentCell.y][currentCell.z]) || !positionPredicate(currentPosition))
+                     !mapPredicate(map.cells[currentCell.x][currentCell.y][currentCell.z]) || !positionPredicate(currentPosition))
                 return {true, currentDistance};
         }
     }
