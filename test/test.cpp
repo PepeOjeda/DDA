@@ -52,7 +52,7 @@ void test()
             auto result = DDA::_2D::marchRay<bool>({2.7, 0.5}, {1,1}, 10, map,[](bool b){return b;});
             for(const auto& p : result.lengthInCell)
             {
-                Vector2Int cell =p.first;
+                DDA::Vector2Int cell =p.first;
                 std::cout<<"("<<cell.x<<","<<cell.y<<")"<<": "<<p.second<<"\n";
             }
         }
@@ -76,7 +76,7 @@ void test()
             auto result = DDA::_3D::marchRay<bool>({0, 0, 0}, {1,1,1}, 10, map,[](bool b){return b;});
             for(const auto& p : result.lengthInCell)
             {
-                Vector3Int cell =p.first;
+                DDA::Vector3Int cell =p.first;
                 std::cout<<"("<<cell.x<<","<<cell.y<<")"<<": "<<p.second<<"\n";
             }
             
