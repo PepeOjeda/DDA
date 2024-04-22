@@ -122,10 +122,9 @@ namespace DDA::_2D
             }
             currentCell = static_cast<Vector2Int>((currentPosition - map.origin) / map.resolution);
 
-            if ((currentPosition - start).norm() > maxDistance)
+            if ((currentPosition - start).norm() > maxDistance || currentCell.x < 0 || currentCell.x >= map.cells.size() || currentCell.y < 0 || currentCell.y >= map.cells[0].size())
                 return {false, maxDistance};
-            else if (currentCell.x < 0 || currentCell.x >= map.cells.size() || currentCell.y < 0 || currentCell.y >= map.cells[0].size() ||
-                     !mapPredicate(map.cells[currentCell.x][currentCell.y]) || !positionPredicate(currentPosition))
+            else if (!mapPredicate(map.cells[currentCell.x][currentCell.y]) || !positionPredicate(currentPosition))
                 return {true, currentDistance};
         }
     }
@@ -195,10 +194,9 @@ namespace DDA::_2D
             }
             currentCell = static_cast<Vector2Int>((currentPosition - map.origin) / map.resolution);
 
-            if ((currentPosition - start).norm() > maxDistance)
+            if ((currentPosition - start).norm() > maxDistance || currentCell.x < 0 || currentCell.x >= map.cells.size() || currentCell.y < 0 || currentCell.y >= map.cells[0].size())
                 return RayMarchInfo();
-            else if (currentCell.x < 0 || currentCell.x >= map.cells.size() || currentCell.y < 0 || currentCell.y >= map.cells[0].size() ||
-                     !mapPredicate(map.cells[currentCell.x][currentCell.y]) || !positionPredicate(currentPosition))
+            else if (!mapPredicate(map.cells[currentCell.x][currentCell.y]) || !positionPredicate(currentPosition))
                 return {lengthsMap, currentDistance};
         }
     }
@@ -309,11 +307,10 @@ namespace DDA::_3D
 
             currentCell = static_cast<Vector3Int>((currentPosition - map.origin) / map.resolution);
 
-            if (currentDistance > maxDistance)
+            if (currentDistance > maxDistance || currentCell.x < 0 || currentCell.x >= map.cells.size() || currentCell.y < 0 ||
+                currentCell.y >= map.cells[0].size() || currentCell.z < 0 || currentCell.z >= map.cells[0][0].size())
                 return {false, maxDistance};
-            else if (currentCell.x < 0 || currentCell.x >= map.cells.size() || currentCell.y < 0 || currentCell.y >= map.cells[0].size() ||
-                     currentCell.z < 0 || currentCell.z >= map.cells[0][0].size() ||
-                     !mapPredicate(map.cells[currentCell.x][currentCell.y][currentCell.z]) || !positionPredicate(currentPosition))
+            else if (!mapPredicate(map.cells[currentCell.x][currentCell.y][currentCell.z]) || !positionPredicate(currentPosition))
                 return {true, currentDistance};
         }
     }
@@ -402,11 +399,10 @@ namespace DDA::_3D
 
             currentCell = static_cast<Vector3Int>((currentPosition - map.origin) / map.resolution);
 
-            if (currentDistance > maxDistance)
+            if (currentDistance > maxDistance || currentCell.x < 0 || currentCell.x >= map.cells.size() || currentCell.y < 0 ||
+                currentCell.y >= map.cells[0].size() || currentCell.z < 0 || currentCell.z >= map.cells[0][0].size())
                 return RayMarchInfo();
-            else if (currentCell.x < 0 || currentCell.x >= map.cells.size() || currentCell.y < 0 || currentCell.y >= map.cells[0].size() ||
-                     currentCell.z < 0 || currentCell.z >= map.cells[0][0].size() ||
-                     !mapPredicate(map.cells[currentCell.x][currentCell.y][currentCell.z]) || !positionPredicate(currentPosition))
+            else if (!mapPredicate(map.cells[currentCell.x][currentCell.y][currentCell.z]) || !positionPredicate(currentPosition))
                 return {lengthsMap, currentDistance};
         }
     }
