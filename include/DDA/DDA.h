@@ -44,13 +44,20 @@ namespace DDA::_2D
     template <typename T> struct Map
     {
         Map(){}
-        Map(std::vector<std::vector<T>> _cells,
+        Map(const std::vector<T>& _cells,
             glm::vec2 _origin,
-            float _resolution): cells(_cells), origin(_origin), resolution(_resolution)
+            float _resolution,
+            glm::ivec2 _dimensions): cells(_cells), origin(_origin), resolution(_resolution), dimensions(_dimensions)
             {}
-        std::vector<std::vector<T>> cells;
+        const std::vector<T>& cells;
         glm::vec2 origin;
         float resolution;
+        glm::ivec2 dimensions;
+
+        const T& at(size_t i, size_t j) const
+        {
+            return cells[i*dimensions.x + j];
+        }
     };
 
     // returns true if a blocked cell was hit. The outline of the map is considered blocked.
@@ -68,15 +75,21 @@ namespace DDA::_2D
 
         glm::ivec2 currentCell = (start - map.origin) / map.resolution;
         glm::vec2 currentPosition = start;
-        if (currentCell.x < 0 || currentCell.x >= map.cells.size() || currentCell.y < 0 || currentCell.y >= map.cells[0].size() ||
-            !mapPredicate(map.cells[currentCell.x][currentCell.y]) || !positionPredicate(currentPosition))
+        if (currentCell.x < 0 || currentCell.x >= map.dimensions.x || currentCell.y < 0 || currentCell.y >= map.dimensions.y)
         {
             Error();
             printf("Ray outside the environment!\n");
             return {false, 0};
         }
+            
+        if(!mapPredicate(map.at(currentCell.x, currentCell.y)) || !positionPredicate(currentPosition))
+        {
+            Error();
+            printf("Ray starts inside an obstacle!\n");
+            return {false, 0};
+        }
 
-        direction = direction / glm::length(direction);
+        direction = glm::normalize(direction);
         int stepX = glm::sign(direction.x);
         int stepY = glm::sign(direction.y);
 
@@ -110,11 +123,11 @@ namespace DDA::_2D
                 currentPosition += direction * tY;
                 currentDistance += tY;
             }
-            currentCell = glm::floor((currentPosition - map.origin) / map.resolution);
+            currentCell = (currentPosition - map.origin) / map.resolution;
 
-            if (currentDistance > maxDistance || currentCell.x < 0 || currentCell.x >= map.cells.size() || currentCell.y < 0 || currentCell.y >= map.cells[0].size())
+            if (currentDistance > maxDistance || currentCell.x < 0 || currentCell.x >= map.dimensions.x || currentCell.y < 0 || currentCell.y >= map.dimensions.y)
                 return {false, maxDistance};
-            else if (!mapPredicate(map.cells[currentCell.x][currentCell.y]) || !positionPredicate(currentPosition))
+            else if (!mapPredicate(map.at(currentCell.x, currentCell.y)) || !positionPredicate(currentPosition))
                 return {true, currentDistance};
         }
     }
@@ -136,16 +149,21 @@ namespace DDA::_2D
         glm::ivec2 currentCell = (start - map.origin) / map.resolution;
         glm::vec2 currentPosition = start;
 
-        if (currentCell.x < 0 || currentCell.x >= map.cells.size() || currentCell.y < 0 || currentCell.y >= map.cells[0].size() ||
-            !mapPredicate(map.cells[currentCell.x][currentCell.y]) || !positionPredicate(currentPosition))
+        if (currentCell.x < 0 || currentCell.x >= map.dimensions.x || currentCell.y < 0 || currentCell.y >= map.dimensions.y)
         {
             Error();
-            printf("Ray origin in invalid position: (%f, %f)\n", start.x, start.y);
-
+            printf("Ray outside the environment!\n");
+            return RayMarchInfo();
+        }
+            
+        if(!mapPredicate(map.at(currentCell.x, currentCell.y)) || !positionPredicate(currentPosition))
+        {
+            Error();
+            printf("Ray starts inside an obstacle!\n");
             return RayMarchInfo();
         }
 
-        direction = direction / glm::length(direction);
+        direction = glm::normalize(direction);
         int stepX = glm::sign(direction.x);
         int stepY = glm::sign(direction.y);
 
@@ -182,11 +200,11 @@ namespace DDA::_2D
                 currentPosition += direction * tY;
                 currentDistance += tY;
             }
-            currentCell = glm::floor((currentPosition - map.origin) / map.resolution);
+            currentCell = (currentPosition - map.origin) / map.resolution;
 
-            if (currentDistance > maxDistance || currentCell.x < 0 || currentCell.x >= map.cells.size() || currentCell.y < 0 || currentCell.y >= map.cells[0].size())
+            if (currentDistance > maxDistance || currentCell.x < 0 || currentCell.x >= map.dimensions.x || currentCell.y < 0 || currentCell.y >= map.dimensions.y)
                 return RayMarchInfo();
-            else if (!mapPredicate(map.cells[currentCell.x][currentCell.y]) || !positionPredicate(currentPosition))
+            else if (!mapPredicate(map.at(currentCell.x, currentCell.y)) || !positionPredicate(currentPosition))
                 return {lengthsMap, currentDistance};
         }
     }
@@ -213,13 +231,20 @@ namespace DDA::_3D
     template <typename T> struct Map
     {
         Map(){}
-        Map(std::vector<std::vector<std::vector<T>>> _cells,
+        Map(const std::vector<T>& _cells,
             glm::vec3 _origin,
-            float _resolution): cells(_cells), origin(_origin), resolution(_resolution)
+            float _resolution,
+            glm::ivec3 _dimensions): cells(_cells), origin(_origin), resolution(_resolution), dimensions(_dimensions)
             {}
-        std::vector<std::vector<std::vector<T>>> cells;
+        const std::vector<T>& cells;
         glm::vec3 origin;
         float resolution;
+        glm::ivec3 dimensions;
+
+        const T& at(size_t i, size_t j, size_t h) const
+        {
+            return cells[i*dimensions.x + j*dimensions.y + h];
+        }
     };
 
     // returns true if a blocked cell was hit. The outline of the map is considered blocked.
@@ -237,17 +262,23 @@ namespace DDA::_3D
 
         glm::ivec3 currentCell = (start - map.origin) / map.resolution;
         glm::vec3 currentPosition = start;
-        if (currentCell.x < 0 || currentCell.x >= map.cells.size() || currentCell.y < 0 || currentCell.y >= map.cells[0].size() ||
-            currentCell.z < 0 || currentCell.z >= map.cells[0][0].size() || !mapPredicate(map.cells[currentCell.x][currentCell.y][currentCell.z]) ||
-            !positionPredicate(currentPosition))
+        if (currentCell.x < 0 || currentCell.x >= map.dimensions.x || currentCell.y < 0 || currentCell.y >= map.dimensions.y ||
+            currentCell.z < 0 || currentCell.z >= map.dimensions.z)
         {
             Error();
             printf("Ray origin in invalid position: (%f, %f, %f)\n", start.x, start.y, start.z);
 
             return {false, 0};
         }
+            
+        if(!mapPredicate(map.at(currentCell.x, currentCell.y, currentCell.z)) || !positionPredicate(currentPosition))
+        {
+            Error();
+            printf("Ray starts inside an obstacle!\n");
+            return {false, 0};
+        }
 
-        direction = direction / glm::length(direction);
+        direction = glm::normalize(direction);
         int stepX = glm::sign(direction.x);
         int stepY = glm::sign(direction.y);
         int stepZ = glm::sign(direction.z);
@@ -295,12 +326,12 @@ namespace DDA::_3D
                 currentDistance += tZ;
             }
 
-            currentCell = glm::floor((currentPosition - map.origin) / map.resolution);
+            currentCell = (currentPosition - map.origin) / map.resolution;
 
-            if (currentDistance > maxDistance || currentCell.x < 0 || currentCell.x >= map.cells.size() || currentCell.y < 0 ||
-                currentCell.y >= map.cells[0].size() || currentCell.z < 0 || currentCell.z >= map.cells[0][0].size())
+            if (currentDistance > maxDistance || currentCell.x < 0 || currentCell.x >= map.dimensions.x || currentCell.y < 0 ||
+                currentCell.y >= map.dimensions.y || currentCell.z < 0 || currentCell.z >= map.dimensions.z)
                 return {false, maxDistance};
-            else if (!mapPredicate(map.cells[currentCell.x][currentCell.y][currentCell.z]) || !positionPredicate(currentPosition))
+            else if (!mapPredicate(map.at(currentCell.x, currentCell.y, currentCell.z)) || !positionPredicate(currentPosition))
                 return {true, currentDistance};
         }
     }
@@ -322,17 +353,23 @@ namespace DDA::_3D
         glm::ivec3 currentCell = (start - map.origin) / map.resolution;
         glm::vec3 currentPosition = start;
 
-        if (currentCell.x < 0 || currentCell.x >= map.cells.size() || currentCell.y < 0 || currentCell.y >= map.cells[0].size() ||
-            currentCell.z < 0 || currentCell.z >= map.cells[0][0].size() || !mapPredicate(map.cells[currentCell.x][currentCell.y][currentCell.z]) ||
-            !positionPredicate(currentPosition))
+        if (currentCell.x < 0 || currentCell.x >= map.dimensions.x || currentCell.y < 0 || currentCell.y >= map.dimensions.y ||
+            currentCell.z < 0 || currentCell.z >= map.dimensions.z)
         {
             Error();
-            printf("Ray outside the environment!\n");
+            printf("Ray origin in invalid position: (%f, %f, %f)\n", start.x, start.y, start.z);
 
             return RayMarchInfo();
         }
+            
+        if(!mapPredicate(map.at(currentCell.x, currentCell.y, currentCell.z)) || !positionPredicate(currentPosition))
+        {
+            Error();
+            printf("Ray starts inside an obstacle!\n");
+            return RayMarchInfo();
+        }
 
-        direction = direction / glm::length(direction);
+        direction = glm::normalize(direction);
         int stepX = glm::sign(direction.x);
         int stepY = glm::sign(direction.y);
         int stepZ = glm::sign(direction.z);
@@ -387,12 +424,12 @@ namespace DDA::_3D
                 currentDistance += tZ;
             }
 
-            currentCell = glm::floor((currentPosition - map.origin) / map.resolution);
+            currentCell = (currentPosition - map.origin) / map.resolution;
 
-            if (currentDistance > maxDistance || currentCell.x < 0 || currentCell.x >= map.cells.size() || currentCell.y < 0 ||
-                currentCell.y >= map.cells[0].size() || currentCell.z < 0 || currentCell.z >= map.cells[0][0].size())
+            if (currentDistance > maxDistance || currentCell.x < 0 || currentCell.x >= map.dimensions.x || currentCell.y < 0 ||
+                currentCell.y >= map.dimensions.y || currentCell.z < 0 || currentCell.z >= map.dimensions.z)
                 return RayMarchInfo();
-            else if (!mapPredicate(map.cells[currentCell.x][currentCell.y][currentCell.z]) || !positionPredicate(currentPosition))
+            else if (!mapPredicate(map.at(currentCell.x, currentCell.y, currentCell.z)) || !positionPredicate(currentPosition))
                 return {lengthsMap, currentDistance};
         }
     }
