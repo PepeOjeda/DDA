@@ -1,11 +1,12 @@
 #pragma once
 #include <math.h>
+#include <functional>
 
 namespace DDA
 {
 
     class Vector2;
-    inline Vector2 operator/(const Vector2 vec, const float& other);
+    inline Vector2 operator/(const Vector2& vec, const float& other);
 
     class Vector2
     {
@@ -85,17 +86,27 @@ namespace DDA
     };
 
     // scalar multiplication
-    inline Vector2 operator*(const Vector2 vec, const float& other)
+    inline Vector2 operator*(const Vector2& vec, const float& other)
     {
         return Vector2(vec.x * other, vec.y * other);
     }
-    inline Vector2 operator*(const float& other, const Vector2 vec)
+    inline Vector2 operator*(const float& other, const Vector2& vec)
     {
         return vec * other;
     }
 
-    inline Vector2 operator/(const Vector2 vec, const float& other)
+    inline Vector2 operator/(const Vector2& vec, const float& other)
     {
         return Vector2(vec.x / other, vec.y / other);
     }
+    
 } // namespace DDA
+
+template<>
+struct std::hash<DDA::Vector2>
+{
+    size_t operator()(const DDA::Vector2& vec) const
+    {
+        return *(size_t*) &vec.x + (*(size_t*)(&vec.y) << 32);
+    }
+};

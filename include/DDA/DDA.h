@@ -83,8 +83,8 @@ namespace DDA::_2D
             return {false, 0};
         }
 
-        Vector2 currentCell = (start - map.origin) / map.resolution;
-        Vector2Int currentPosition = start;
+        Vector2 currentPosition = start;
+        Vector2Int currentCell = static_cast<Vector2Int>((start - map.origin) / map.resolution);
         if (currentCell.x < 0 || currentCell.x >= map.dimensions.x || currentCell.y < 0 || currentCell.y >= map.dimensions.y)
         {
             Error();

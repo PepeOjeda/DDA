@@ -4,7 +4,7 @@
 namespace DDA
 {
     class Vector3;
-    inline Vector3 operator/(const Vector3 vec, const float& other);
+    inline Vector3 operator/(const Vector3& vec, const float& other);
 
     class Vector3
     {
@@ -82,21 +82,31 @@ namespace DDA
     };
 
     // scalar multiplication
-    inline Vector3 operator*(const Vector3 vec, const float& other)
+    inline Vector3 operator*(const Vector3& vec, const float& other)
     {
         return Vector3(vec.x * other, vec.y * other, vec.z * other);
     }
-    inline Vector3 operator*(const int& other, const Vector3 vec)
+    inline Vector3 operator*(const int& other, const Vector3& vec)
     {
         return vec * other;
     }
-    inline Vector3 operator*(const float& other, const Vector3 vec)
+    inline Vector3 operator*(const float& other, const Vector3& vec)
     {
         return vec * other;
     }
 
-    inline Vector3 operator/(const Vector3 vec, const float& other)
+    inline Vector3 operator/(const Vector3& vec, const float& other)
     {
         return Vector3(vec.x / other, vec.y / other, vec.z / other);
     }
 } // namespace DDA
+
+
+template<>
+struct std::hash<DDA::Vector3>
+{
+    size_t operator()(const DDA::Vector3& vec) const
+    {
+        return *(size_t*) &vec.x + *(size_t*)(&vec.y) + (*(size_t*)(&vec.z) << 32);
+    }
+};

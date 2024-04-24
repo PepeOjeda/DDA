@@ -54,21 +54,6 @@ namespace DDA
             return std::sqrt(x * x + y * y);
         }
 
-        struct Vec2IntCompare
-        {
-            bool operator()(const Vector2Int& one, const Vector2Int& other) const
-            {
-                return one == other;
-            }
-        };
-        struct Vec2IntHash
-        {
-            size_t operator()(const Vector2Int& one) const
-            {
-                return one.x * 7 + one.y * 4397;
-            }
-        };
-
         operator Vector2() const
         {
             return Vector2(x, y);
@@ -84,3 +69,13 @@ namespace DDA
         return p * f;
     }
 } // namespace DDA
+
+
+template<>
+struct std::hash<DDA::Vector2Int>
+{
+    size_t operator()(const DDA::Vector2Int& vec) const
+    {
+        return *(size_t*) &vec.x + (*(size_t*)(&vec.y) << 32);
+    }
+};
