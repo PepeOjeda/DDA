@@ -54,7 +54,7 @@ namespace DDA
             return std::sqrt(x * x + y * y);
         }
 
-        operator Vector2() const
+        explicit operator Vector2() const
         {
             return Vector2(x, y);
         }
