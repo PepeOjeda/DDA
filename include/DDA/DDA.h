@@ -84,7 +84,7 @@ namespace DDA::_2D
         }
 
         Vector2 currentPosition = start;
-        Vector2Int currentCell = static_cast<Vector2Int>((start - map.origin) / map.resolution);
+        Vector2Int currentCell = Vector2Int((start - map.origin) / map.resolution);
         if (currentCell.x < 0 || currentCell.x >= map.dimensions.x || currentCell.y < 0 || currentCell.y >= map.dimensions.y)
         {
             Error();
@@ -133,7 +133,7 @@ namespace DDA::_2D
                 currentPosition += direction * tY;
                 currentDistance += tY;
             }
-            currentCell = static_cast<Vector2Int>((currentPosition - map.origin) / map.resolution);
+            currentCell = Vector2Int((currentPosition - map.origin) / map.resolution);
 
             if (currentDistance > maxDistance || currentCell.x < 0 || currentCell.x >= map.dimensions.x || currentCell.y < 0 || currentCell.y >= map.dimensions.y)
                 return {false, maxDistance};
@@ -157,7 +157,7 @@ namespace DDA::_2D
         }
 
         Vector2 currentPosition = start;
-        Vector2Int currentCell = static_cast<Vector2Int>((currentPosition - map.origin) / map.resolution);
+        Vector2Int currentCell = Vector2Int((currentPosition - map.origin) / map.resolution);
 
         if (currentCell.x < 0 || currentCell.x >= map.dimensions.x || currentCell.y < 0 || currentCell.y >= map.dimensions.y)
         {
@@ -211,7 +211,7 @@ namespace DDA::_2D
                 currentDistance += tY;
             }
             
-            currentCell = static_cast<Vector2Int>((currentPosition - map.origin) / map.resolution);
+            currentCell = Vector2Int((currentPosition - map.origin) / map.resolution);
 
             if (currentDistance > maxDistance || currentCell.x < 0 || currentCell.x >= map.dimensions.x || currentCell.y < 0 || currentCell.y >= map.dimensions.y)
                 return RayMarchInfo();
@@ -272,7 +272,7 @@ namespace DDA::_3D
         }
 
         Vector3 currentPosition = start;
-        Vector3Int currentCell = static_cast<Vector3Int>((currentPosition - map.origin) / map.resolution);
+        Vector3Int currentCell = Vector3Int((currentPosition - map.origin) / map.resolution);
         if (currentCell.x < 0 || currentCell.x >= map.dimensions.x || currentCell.y < 0 || currentCell.y >= map.dimensions.y ||
             currentCell.z < 0 || currentCell.z >= map.dimensions.z)
         {
@@ -337,7 +337,7 @@ namespace DDA::_3D
                 currentDistance += tZ;
             }
 
-            currentCell = static_cast<Vector3Int>((currentPosition - map.origin) / map.resolution);
+            currentCell = Vector3Int((currentPosition - map.origin) / map.resolution);
 
             if (currentDistance > maxDistance || currentCell.x < 0 || currentCell.x >= map.dimensions.x || currentCell.y < 0 ||
                 currentCell.y >= map.dimensions.y || currentCell.z < 0 || currentCell.z >= map.dimensions.z)
@@ -362,7 +362,7 @@ namespace DDA::_3D
         }
 
         Vector3 currentPosition = start;
-        Vector3Int currentCell = static_cast<Vector3Int>((currentPosition - map.origin) / map.resolution);
+        Vector3Int currentCell = Vector3Int((currentPosition - map.origin) / map.resolution);
 
         if (currentCell.x < 0 || currentCell.x >= map.dimensions.x || currentCell.y < 0 || currentCell.y >= map.dimensions.y ||
             currentCell.z < 0 || currentCell.z >= map.dimensions.z)
@@ -435,7 +435,7 @@ namespace DDA::_3D
                 currentDistance += tZ;
             }
 
-            currentCell = static_cast<Vector3Int>((currentPosition - map.origin) / map.resolution);
+            currentCell = Vector3Int((currentPosition - map.origin) / map.resolution);
 
             if (currentDistance > maxDistance || currentCell.x < 0 || currentCell.x >= map.dimensions.x || currentCell.y < 0 ||
                 currentCell.y >= map.dimensions.y || currentCell.z < 0 || currentCell.z >= map.dimensions.z)
