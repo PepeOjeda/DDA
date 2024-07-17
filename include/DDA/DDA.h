@@ -51,14 +51,14 @@ namespace DDA::_2D
         {}
     };
 
-    template <typename T> struct Map
+    template <typename T>
+    struct Map
     {
-        Map(){}
-        Map(const std::vector<T>& _cells,
-            Vector2 _origin,
-            float _resolution,
-            Vector2Int _dimensions): cells(_cells), origin(_origin), resolution(_resolution), dimensions(_dimensions)
-            {}
+        Map()
+        {}
+        Map(const std::vector<T>& _cells, Vector2 _origin, float _resolution, Vector2Int _dimensions)
+            : cells(_cells), origin(_origin), resolution(_resolution), dimensions(_dimensions)
+        {}
         const std::vector<T>& cells;
         Vector2 origin;
         float resolution;
@@ -66,7 +66,7 @@ namespace DDA::_2D
 
         const T& at(size_t i, size_t j) const
         {
-            return cells[i*dimensions.x + j];
+            return cells[j * dimensions.x + i];
         }
     };
 
@@ -241,12 +241,11 @@ namespace DDA::_3D
 
     template <typename T> struct Map
     {
-        Map(){}
-        Map(const std::vector<T>& _cells,
-            Vector3 _origin,
-            float _resolution,
-            Vector3Int _dimensions): cells(_cells), origin(_origin), resolution(_resolution), dimensions(_dimensions)
-            {}
+        Map()
+        {}
+        Map(const std::vector<T>& _cells, Vector3 _origin, float _resolution, Vector3Int _dimensions)
+            : cells(_cells), origin(_origin), resolution(_resolution), dimensions(_dimensions)
+        {}
         const std::vector<T>& cells;
         Vector3 origin;
         float resolution;
@@ -254,7 +253,7 @@ namespace DDA::_3D
 
         const T& at(size_t i, size_t j, size_t h) const
         {
-            return cells[i*dimensions.x + j*dimensions.y + h];
+            return cells[h * dimensions.x * dimensions.y + j * dimensions.x + i];
         }
     };
 
@@ -272,7 +271,7 @@ namespace DDA::_3D
         }
 
         Vector3 currentPosition = start;
-        Vector3Int currentCell = Vector3Int((currentPosition - map.origin) / map.resolution);
+        Vector3Int currentCell = static_cast<Vector3Int>((currentPosition - map.origin) / map.resolution);
         if (currentCell.x < 0 || currentCell.x >= map.dimensions.x || currentCell.y < 0 || currentCell.y >= map.dimensions.y ||
             currentCell.z < 0 || currentCell.z >= map.dimensions.z)
         {
@@ -337,7 +336,7 @@ namespace DDA::_3D
                 currentDistance += tZ;
             }
 
-            currentCell = Vector3Int((currentPosition - map.origin) / map.resolution);
+            currentCell = static_cast<Vector3Int>((currentPosition - map.origin) / map.resolution);
 
             if (currentDistance > maxDistance || currentCell.x < 0 || currentCell.x >= map.dimensions.x || currentCell.y < 0 ||
                 currentCell.y >= map.dimensions.y || currentCell.z < 0 || currentCell.z >= map.dimensions.z)
@@ -362,7 +361,7 @@ namespace DDA::_3D
         }
 
         Vector3 currentPosition = start;
-        Vector3Int currentCell = Vector3Int((currentPosition - map.origin) / map.resolution);
+        Vector3Int currentCell = static_cast<Vector3Int>((currentPosition - map.origin) / map.resolution);
 
         if (currentCell.x < 0 || currentCell.x >= map.dimensions.x || currentCell.y < 0 || currentCell.y >= map.dimensions.y ||
             currentCell.z < 0 || currentCell.z >= map.dimensions.z)
@@ -435,7 +434,7 @@ namespace DDA::_3D
                 currentDistance += tZ;
             }
 
-            currentCell = Vector3Int((currentPosition - map.origin) / map.resolution);
+            currentCell = static_cast<Vector3Int>((currentPosition - map.origin) / map.resolution);
 
             if (currentDistance > maxDistance || currentCell.x < 0 || currentCell.x >= map.dimensions.x || currentCell.y < 0 ||
                 currentCell.y >= map.dimensions.y || currentCell.z < 0 || currentCell.z >= map.dimensions.z)
