@@ -56,7 +56,7 @@ namespace DDA::_2D
 
         const T& at(size_t i, size_t j) const
         {
-            return cells[i*dimensions.x + j];
+            return cells[j * dimensions.x + i];
         }
     };
 
@@ -243,7 +243,7 @@ namespace DDA::_3D
 
         const T& at(size_t i, size_t j, size_t h) const
         {
-            return cells[i*dimensions.x + j*dimensions.y + h];
+            return cells[h * dimensions.x * dimensions.y + j * dimensions.x + i];
         }
     };
 
