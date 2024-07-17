@@ -70,7 +70,7 @@ namespace DDA
         inline void normalize()
         {
             float n = norm();
-            if (n == 0)
+            if (n != 0)
             {
                 x /= n;
                 y /= n;
