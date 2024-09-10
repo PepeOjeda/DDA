@@ -97,3 +97,4 @@ namespace DDA::_3D
                 return {true, currentDistance};
         }
     }
+}
