@@ -18,7 +18,7 @@ namespace DDA::_2D
         if (direction.norm() == 0)
         {
             Warn();
-            printf("Ray of length 0\n");
+            fprintf(stderr, "Ray of length 0\n");
             return {false, 0};
         }
 
@@ -27,14 +27,14 @@ namespace DDA::_2D
         if (currentCell.x < 0 || currentCell.x >= map.dimensions.x || currentCell.y < 0 || currentCell.y >= map.dimensions.y)
         {
             Error();
-            printf("Ray outside the environment!\n");
+            fprintf(stderr, "Ray outside the environment!\n");
             return {false, 0};
         }
             
         if(!mapPredicate(map.at(currentCell.x, currentCell.y)) || !positionPredicate(currentPosition))
         {
             Error();
-            printf("Ray starts inside an obstacle!\n");
+            fprintf(stderr, "Ray starts inside an obstacle!\n");
             return {false, 0};
         }
 

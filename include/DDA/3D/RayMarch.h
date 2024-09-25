@@ -24,7 +24,7 @@ namespace DDA::_3D
         if (direction.norm() == 0)
         {
             Warn();
-            printf("Ray of length 0\n");
+            fprintf(stderr, "Ray of length 0\n");
 
             return RayMarchInfo();
         }
@@ -36,7 +36,7 @@ namespace DDA::_3D
             currentCell.z < 0 || currentCell.z >= map.dimensions.z)
         {
             Error();
-            printf("Ray origin in invalid position: (%f, %f, %f)\n", start.x, start.y, start.z);
+            fprintf(stderr, "Ray origin in invalid position: (%f, %f, %f)\n", start.x, start.y, start.z);
 
             return RayMarchInfo();
         }
@@ -44,7 +44,7 @@ namespace DDA::_3D
         if(!mapPredicate(map.at(currentCell.x, currentCell.y, currentCell.z)) || !positionPredicate(currentPosition))
         {
             Error();
-            printf("Ray starts inside an obstacle!\n");
+            fprintf(stderr, "Ray starts inside an obstacle!\n");
             return RayMarchInfo();
         }
 

@@ -13,19 +13,19 @@ inline int sign(float x)
 
 inline void resetColor()
 {
-    printf("\033[0m");
+    fprintf(stderr, "\033[0m");
 }
 
 inline void Error()
 {
-    printf("\033[1;31m");
-    printf("[ERROR] ");
+    fprintf(stderr, "\033[1;31m");
+    fprintf(stderr, "[ERROR] ");
     resetColor();
 }
 
 inline void Warn()
 {
-    printf("\033[1;33m");
-    printf("[WARN] ");
+    fprintf(stderr, "\033[1;33m");
+    fprintf(stderr, "[WARN] ");
     resetColor();
 }
