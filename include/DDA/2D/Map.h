@@ -20,7 +20,7 @@ namespace DDA::_2D
 
         const T& at(size_t i, size_t j) const
         {
-            return (*cells)[j * dimensions.x + i];
+            return cells->at(j * dimensions.x + i);
         }
 
     private:

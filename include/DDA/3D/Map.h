@@ -20,7 +20,7 @@ namespace DDA::_3D
 
         const T& at(size_t i, size_t j, size_t h) const
         {
-            return (*cells)[h * dimensions.x * dimensions.y + j * dimensions.x + i];
+            return cells->at(h * dimensions.x * dimensions.y + j * dimensions.x + i);
         }
 
     private:

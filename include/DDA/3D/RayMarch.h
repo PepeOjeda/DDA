@@ -29,8 +29,9 @@ namespace DDA::_3D
             return RayMarchInfo();
         }
 
+        float invResolution = 1. / map.resolution;
         Vector3 currentPosition = start;
-        Vector3Int currentCell = static_cast<Vector3Int>((currentPosition - map.origin) / map.resolution);
+        Vector3Int currentCell = static_cast<Vector3Int>((currentPosition - map.origin) * invResolution);
 
         if (currentCell.x < 0 || currentCell.x >= map.dimensions.x || currentCell.y < 0 || currentCell.y >= map.dimensions.y ||
             currentCell.z < 0 || currentCell.z >= map.dimensions.z)
@@ -49,6 +50,8 @@ namespace DDA::_3D
         }
 
         direction = direction / direction.norm();
+        Vector3 invDirection(1. / direction.x, 1. / direction.y, 1. / direction.z);
+
         int stepX = sign(direction.x);
         int stepY = sign(direction.y);
         int stepZ = sign(direction.z);
@@ -62,23 +65,23 @@ namespace DDA::_3D
             float zCoordNext = (stepZ > 0 ? currentCell.z + 1 : currentCell.z) * map.resolution + map.origin.z;
 
             // how far to move along direction, correcting for floating-point shenanigans
-            float tX = (xCoordNext - currentPosition.x) / direction.x;
+            float tX = (xCoordNext - currentPosition.x) * invDirection.x;
             if (tX <= 0)
             {
                 xCoordNext += stepX * map.resolution;
-                tX = (xCoordNext - currentPosition.x) / direction.x;
+                tX = (xCoordNext - currentPosition.x) * invDirection.x;
             }
-            float tY = (yCoordNext - currentPosition.y) / direction.y;
+            float tY = (yCoordNext - currentPosition.y) * invDirection.y;
             if (tY <= 0)
             {
                 yCoordNext += stepY * map.resolution;
-                tY = (yCoordNext - currentPosition.y) / direction.y;
+                tY = (yCoordNext - currentPosition.y) * invDirection.y;
             }
-            float tZ = (zCoordNext - currentPosition.z) / direction.z;
+            float tZ = (zCoordNext - currentPosition.z) * invDirection.z;
             if (tZ <= 0)
             {
                 zCoordNext += stepZ * map.resolution;
-                tZ = (zCoordNext - currentPosition.z) / direction.z;
+                tZ = (zCoordNext - currentPosition.z) * invDirection.z;
             }
 
             if (stepX != 0 && (tX < tY || stepY == 0) && (tX < tZ || stepZ == 0))
@@ -103,7 +106,7 @@ namespace DDA::_3D
                 currentDistance += tZ;
             }
 
-            currentCell = static_cast<Vector3Int>((currentPosition - map.origin) / map.resolution);
+            currentCell = static_cast<Vector3Int>((currentPosition - map.origin) * invResolution);
 
             if (currentDistance > maxDistance || currentCell.x < 0 || currentCell.x >= map.dimensions.x || currentCell.y < 0 ||
                 currentCell.y >= map.dimensions.y || currentCell.z < 0 || currentCell.z >= map.dimensions.z)

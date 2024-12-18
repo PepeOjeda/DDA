@@ -27,8 +27,9 @@ namespace DDA::_2D
             return RayMarchInfo();
         }
 
+        float invResolution = 1. / map.resolution;
         Vector2 currentPosition = start;
-        Vector2Int currentCell = Vector2Int((currentPosition - map.origin) / map.resolution);
+        Vector2Int currentCell = Vector2Int((currentPosition - map.origin) * invResolution);
 
         if (currentCell.x < 0 || currentCell.x >= map.dimensions.x || currentCell.y < 0 || currentCell.y >= map.dimensions.y)
         {
@@ -45,6 +46,8 @@ namespace DDA::_2D
         }
 
         direction = direction / direction.norm();
+        Vector2 invDirection(1. / direction.x, 1. / direction.y);
+
         int stepX = sign(direction.x);
         int stepY = sign(direction.y);
 
@@ -56,17 +59,17 @@ namespace DDA::_2D
             float yCoordNext = (stepY > 0 ? currentCell.y + 1 : currentCell.y) * map.resolution + map.origin.y;
 
             // how far to move along direction, correcting for floating-point shenanigans
-            float tX = (xCoordNext - currentPosition.x) / direction.x;
+            float tX = (xCoordNext - currentPosition.x) * invDirection.x;
             if (tX <= 0)
             {
                 xCoordNext += stepX * map.resolution;
-                tX = (xCoordNext - currentPosition.x) / direction.x;
+                tX = (xCoordNext - currentPosition.x) * invDirection.x;
             }
-            float tY = (yCoordNext - currentPosition.y) / direction.y;
+            float tY = (yCoordNext - currentPosition.y) * invDirection.y;
             if (tY <= 0)
             {
                 yCoordNext += stepY * map.resolution;
-                tY = (yCoordNext - currentPosition.y) / direction.y;
+                tY = (yCoordNext - currentPosition.y) * invDirection.y;
             }
 
             if ((stepX != 0 && tX > 0 && tX < tY) || (stepY == 0 || tY <= 0))
@@ -82,7 +85,7 @@ namespace DDA::_2D
                 currentDistance += tY;
             }
 
-            currentCell = Vector2Int((currentPosition - map.origin) / map.resolution);
+            currentCell = Vector2Int((currentPosition - map.origin) * invResolution);
 
             if (currentDistance > maxDistance || currentCell.x < 0 || currentCell.x >= map.dimensions.x || currentCell.y < 0 ||
                 currentCell.y >= map.dimensions.y)
