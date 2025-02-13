@@ -1,5 +1,6 @@
-#pragma once 
+#pragma once
 #include "Map.h"
+#include <functional>
 
 namespace DDA::_3D
 {
@@ -17,36 +18,33 @@ namespace DDA::_3D
     {
         if (direction.norm() == 0)
         {
-            Warn();
-            fprintf(stderr, "Ray of length 0\n");
+            Internal::Warn("Ray of length 0\n");
             return {false, 0};
         }
 
         float invResolution = 1. / map.resolution;
         Vector3 currentPosition = start;
         Vector3Int currentCell = static_cast<Vector3Int>((currentPosition - map.origin) * invResolution);
-        if (currentCell.x < 0 || currentCell.x >= map.dimensions.x || currentCell.y < 0 || currentCell.y >= map.dimensions.y ||
-            currentCell.z < 0 || currentCell.z >= map.dimensions.z)
+        if (currentCell.x < 0 || currentCell.x >= map.dimensions.x || currentCell.y < 0 || currentCell.y >= map.dimensions.y || currentCell.z < 0 ||
+            currentCell.z >= map.dimensions.z)
         {
-            Error();
-            fprintf(stderr, "Ray origin in invalid position: (%f, %f, %f)\n", start.x, start.y, start.z);
+            Internal::Error("Ray outside the environment!\n");
 
             return {false, 0};
         }
-            
-        if(!mapPredicate(map.at(currentCell.x, currentCell.y, currentCell.z)) || !positionPredicate(currentPosition))
+
+        if (!mapPredicate(map.at(currentCell.x, currentCell.y, currentCell.z)) || !positionPredicate(currentPosition))
         {
-            Error();
-            fprintf(stderr, "Ray starts inside an obstacle!\n");
+            Internal::Error("Ray starts inside an obstacle!\n");
             return {false, 0};
         }
 
         direction = direction / direction.norm();
         Vector3 invDirection(1. / direction.x, 1. / direction.y, 1. / direction.z);
 
-        int stepX = sign(direction.x);
-        int stepY = sign(direction.y);
-        int stepZ = sign(direction.z);
+        int stepX = Internal::sign(direction.x);
+        int stepY = Internal::sign(direction.y);
+        int stepZ = Internal::sign(direction.z);
 
         float currentDistance = 0;
         while (true)
@@ -100,4 +98,4 @@ namespace DDA::_3D
                 return {true, currentDistance};
         }
     }
-}
+} // namespace DDA::_3D

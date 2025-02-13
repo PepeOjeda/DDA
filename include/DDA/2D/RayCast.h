@@ -7,6 +7,11 @@ namespace DDA::_2D
     {
         bool hitSomething;
         float distance;
+
+        bool invalid()
+        {
+            return !hitSomething && distance == 0;
+        }
     };
 
     // returns true if a blocked cell was hit. The outline of the map is considered blocked.
@@ -17,8 +22,7 @@ namespace DDA::_2D
     {
         if (direction.norm() == 0)
         {
-            Warn();
-            fprintf(stderr, "Ray of length 0\n");
+            Internal::Warn("Ray of length 0\n");
             return {false, 0};
         }
 
@@ -27,23 +31,21 @@ namespace DDA::_2D
         Vector2Int currentCell = Vector2Int((start - map.origin) * invResolution);
         if (currentCell.x < 0 || currentCell.x >= map.dimensions.x || currentCell.y < 0 || currentCell.y >= map.dimensions.y)
         {
-            Error();
-            fprintf(stderr, "Ray outside the environment!\n");
+            Internal::Error("Ray outside the environment!\n");
             return {false, 0};
         }
 
         if (!mapPredicate(map.at(currentCell.x, currentCell.y)) || !positionPredicate(currentPosition))
         {
-            Error();
-            fprintf(stderr, "Ray starts inside an obstacle!\n");
+            Internal::Error("Ray starts inside an obstacle!\n");
             return {false, 0};
         }
 
         direction.normalize();
         Vector2 invDirection(1. / direction.x, 1. / direction.y);
 
-        int stepX = sign(direction.x);
-        int stepY = sign(direction.y);
+        int stepX = Internal::sign(direction.x);
+        int stepY = Internal::sign(direction.y);
 
         float currentDistance = 0;
         while (true)
