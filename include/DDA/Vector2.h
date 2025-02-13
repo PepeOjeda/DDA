@@ -107,6 +107,6 @@ struct std::hash<DDA::Vector2>
 {
     size_t operator()(const DDA::Vector2& vec) const
     {
-        return *(size_t*) &vec.x + (*(size_t*)(&vec.y) << 32);
+        return (size_t) vec.x + ((size_t)(vec.y) << 32);
     }
 };
